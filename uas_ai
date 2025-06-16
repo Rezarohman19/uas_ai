@@ -1,0 +1,62 @@
+import matplotlib.pyplot as plt
+import networkx as nx
+from collections import deque
+
+# ======== Step 1: Definisi Graf (Adjacency List) ========
+graph = {
+    'A': ['B', 'C'],
+    'B': ['D', 'E'],
+    'C': ['F'],
+    'D': [],
+    'E': ['F'],
+    'F': []
+}
+
+# ======== Step 2: Fungsi BFS untuk mencari jalur terpendek ========
+def bfs_shortest_path(graph, start, goal):
+    visited = set()
+    queue = deque([[start]])
+
+    if start == goal:
+        return [start]
+
+    while queue:
+        path = queue.popleft()
+        node = path[-1]
+
+        if node not in visited:
+            for neighbor in graph[node]:
+                new_path = list(path)
+                new_path.append(neighbor)
+                queue.append(new_path)
+
+                if neighbor == goal:
+                    return new_path
+
+            visited.add(node)
+
+    return None
+
+# ======== Step 3: Menjalankan BFS dan Menyimpan Jalurnya ========
+start_node = 'A'
+goal_node = 'F'
+shortest_path = bfs_shortest_path(graph, start_node, goal_node)
+print("Jalur terpendek dari", start_node, "ke", goal_node, ":", shortest_path)
+
+# ======== Step 4: Visualisasi Graf dan Jalur Terpendek ========
+G = nx.DiGraph()
+edges = [('A', 'B'), ('A', 'C'), ('B', 'D'), ('B', 'E'), ('C', 'F'), ('E', 'F')]
+G.add_edges_from(edges)
+
+# Warna edge merah jika termasuk dalam jalur terpendek, hitam jika tidak
+edge_colors = ['red' if (u, v) in zip(shortest_path, shortest_path[1:]) else 'black' for u, v in G.edges()]
+
+# Posisi node
+pos = nx.spring_layout(G, seed=42)
+
+# Gambar graf
+plt.figure(figsize=(8, 6))
+nx.draw(G, pos, with_labels=True, node_color='skyblue', edge_color=edge_colors, node_size=2000, font_size=16)
+plt.title("Visualisasi Jalur Terpendek (BFS) dari {} ke {}".format(start_node, goal_node))
+plt.axis('off')
+plt.show()
